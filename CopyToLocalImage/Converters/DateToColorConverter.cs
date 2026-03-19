@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace CopyToLocalImage.Converters
 {
@@ -97,6 +98,39 @@ namespace CopyToLocalImage.Converters
                 return Path.GetFileNameWithoutExtension(path);
             }
             return string.Empty;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// 文件路径转 BitmapImage 转换器（使用 OnLoad 避免文件锁定）
+    /// </summary>
+    public class FilePathToImageConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value is string path && !string.IsNullOrEmpty(path) && File.Exists(path))
+            {
+                try
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(path);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    bitmap.Freeze(); // 使其可跨线程访问
+                    return bitmap;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+            return null;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
