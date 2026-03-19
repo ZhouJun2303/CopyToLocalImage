@@ -257,11 +257,33 @@ namespace CopyToLocalImage.Services
             lock (_lock)
             {
                 var count = 0;
-                foreach (var item in items.ToList())
+                var itemsToDelete = items.ToList();
+
+                foreach (var item in itemsToDelete)
                 {
-                    if (DeleteImage(item))
+                    try
+                    {
+                        // 删除文件
+                        if (File.Exists(item.FilePath))
+                            File.Delete(item.FilePath);
+
+                        // 删除缩略图
+                        if (File.Exists(item.ThumbnailPath))
+                            File.Delete(item.ThumbnailPath);
+
+                        // 从列表中移除
+                        _imageItems.Remove(item);
                         count++;
+                    }
+                    catch
+                    {
+                        // 忽略单个文件删除失败
+                    }
                 }
+
+                if (count > 0)
+                    Save();
+
                 return count;
             }
         }

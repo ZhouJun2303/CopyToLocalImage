@@ -117,9 +117,16 @@
                         <WrapPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
+                <ListBox.Template>
+                    <ControlTemplate TargetType="ListBox">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ListBox.Template>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Width="180" Height="220"
+                        <Border Width="180" Height="240"
                                 Background="{StaticResource SecondaryBackground}"
                                 CornerRadius="8" Margin="4" Padding="8"
                                 BorderThickness="2"
@@ -147,7 +154,7 @@
                                         Margin="0,0,0,4"
                                         ClipToBounds="True">
                                     <Image Source="{Binding FilePath}"
-                                           Stretch="UniformToFill"
+                                           Stretch="Uniform"
                                            Margin="4">
                                         <Image.ToolTip>
                                             <TextBlock Text="{Binding FilePath}" />
@@ -232,7 +239,7 @@
                                         Background="{StaticResource TertiaryBackground}"
                                         CornerRadius="4"
                                         Margin="0,0,8,0">
-                                    <Image x:Name="ListThumbnailImage"
+                                    <Image Source="{Binding FilePath}"
                                            Stretch="Uniform"
                                            Margin="4" />
                                 </Border>
