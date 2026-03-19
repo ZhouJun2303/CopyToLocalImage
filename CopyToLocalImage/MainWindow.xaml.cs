@@ -112,6 +112,8 @@ namespace CopyToLocalImage
 
         private void FilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_storageService == null) return;
+
             if (FilterComboBox.SelectedItem is ComboBoxItem item)
             {
                 var content = item.Content?.ToString();

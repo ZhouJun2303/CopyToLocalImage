@@ -1,7 +1,5 @@
 using System;
-using System.Windows;
 using System.Windows.Forms;
-using CopyToLocalImage.Models;
 
 namespace CopyToLocalImage.Services
 {
@@ -10,7 +8,7 @@ namespace CopyToLocalImage.Services
     /// </summary>
     public class TrayIconService : IDisposable
     {
-        private NotifyIcon _notifyIcon;
+        private NotifyIcon? _notifyIcon;
         private bool _disposed;
         private readonly Action _onOpen;
         private readonly Action _onExit;
@@ -28,36 +26,50 @@ namespace CopyToLocalImage.Services
         /// </summary>
         public void Initialize()
         {
-            _notifyIcon = new NotifyIcon
+            try
             {
-                Icon = System.Drawing.Icon.ExtractAssociatedIcon(
-                    System.Windows.Forms.Application.ExecutablePath),
-                Text = "CopyToLocalImage - 点击打开",
-                Visible = true
-            };
+                var iconPath = System.IO.Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "app.ico");
 
-            // 创建上下文菜单
-            var contextMenu = new ContextMenuStrip();
-            contextMenu.BackColor = System.Drawing.Color.White;
-            contextMenu.ForeColor = System.Drawing.Color.Black;
+                var icon = System.IO.File.Exists(iconPath)
+                    ? new System.Drawing.Icon(iconPath)
+                    : System.Drawing.SystemIcons.Application;
 
-            var openItem = contextMenu.Items.Add("打开主窗口");
-            openItem.Click += (s, e) => _onOpen?.Invoke();
+                _notifyIcon = new NotifyIcon
+                {
+                    Icon = icon,
+                    Text = "CopyToLocalImage - 点击打开",
+                    Visible = true
+                };
 
-            contextMenu.Items.Add(new ToolStripSeparator());
+                // 创建上下文菜单
+                var contextMenu = new ContextMenuStrip();
+                contextMenu.BackColor = System.Drawing.Color.White;
+                contextMenu.ForeColor = System.Drawing.Color.Black;
 
-            var exitItem = contextMenu.Items.Add("退出");
-            exitItem.Click += (s, e) => _onExit?.Invoke();
+                var openItem = contextMenu.Items.Add("打开主窗口");
+                openItem.Click += (s, e) => _onOpen?.Invoke();
 
-            _notifyIcon.ContextMenuStrip = contextMenu;
+                contextMenu.Items.Add(new ToolStripSeparator());
 
-            // 双击打开
-            _notifyIcon.DoubleClick += (s, e) => _onOpen?.Invoke();
-            _notifyIcon.MouseClick += (s, e) =>
+                var exitItem = contextMenu.Items.Add("退出");
+                exitItem.Click += (s, e) => _onExit?.Invoke();
+
+                _notifyIcon.ContextMenuStrip = contextMenu;
+
+                // 双击打开
+                _notifyIcon.DoubleClick += (s, e) => _onOpen?.Invoke();
+                _notifyIcon.MouseClick += (s, e) =>
+                {
+                    if (e.Button == MouseButtons.Left)
+                        _onOpen?.Invoke();
+                };
+            }
+            catch
             {
-                if (e.Button == MouseButtons.Left)
-                    _onOpen?.Invoke();
-            };
+                // 托盘初始化失败不影响主程序
+            }
         }
 
         /// <summary>
