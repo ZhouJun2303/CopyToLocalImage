@@ -113,12 +113,13 @@ namespace CopyToLocalImage.Services
         {
             try
             {
-                using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    var decoder = new PngBitmapDecoder(stream, BitmapCreateOptions.DelayCreation, BitmapCacheOption.OnDemand);
+                    var decoder = new PngBitmapDecoder(stream, BitmapCreateOptions.DelayCreation, BitmapCacheOption.OnLoad);
                     if (decoder.Frames.Count > 0)
                     {
-                        return (decoder.Frames[0].PixelWidth, decoder.Frames[0].PixelHeight);
+                        var frame = decoder.Frames[0];
+                        return (frame.PixelWidth, frame.PixelHeight);
                     }
                 }
             }
@@ -127,8 +128,10 @@ namespace CopyToLocalImage.Services
                 // 尝试其他方式
                 try
                 {
-                    var bmp = new System.Drawing.Bitmap(filePath);
-                    return (bmp.Width, bmp.Height);
+                    using (var bmp = new System.Drawing.Bitmap(filePath))
+                    {
+                        return (bmp.Width, bmp.Height);
+                    }
                 }
                 catch
                 {

@@ -250,42 +250,175 @@ namespace CopyToLocalImage.Services
         }
 
         /// <summary>
-        /// 批量删除
+        /// 批量删除（通过文件路径）
         /// </summary>
-        public int DeleteImages(IEnumerable<ImageItem> items)
+        public int DeleteImagesByPath(List<string> filePaths)
         {
             lock (_lock)
             {
                 var count = 0;
-                var itemsToDelete = items.ToList();
 
-                foreach (var item in itemsToDelete)
+                foreach (var filePath in filePaths)
                 {
                     try
                     {
+                        // 找到对应的 item
+                        var item = _imageItems.FirstOrDefault(i => i.FilePath == filePath);
+                        if (item == null)
+                        {
+                            LogService.Warning($"未找到图片：{filePath}");
+                            continue;
+                        }
+
                         // 删除文件
                         if (File.Exists(item.FilePath))
+                        {
                             File.Delete(item.FilePath);
+                            LogService.Info($"已删除文件：{item.FilePath}");
+                        }
+                        else
+                        {
+                            LogService.Warning($"文件不存在：{item.FilePath}");
+                        }
 
                         // 删除缩略图
                         if (File.Exists(item.ThumbnailPath))
+                        {
                             File.Delete(item.ThumbnailPath);
+                            LogService.Info($"已删除缩略图：{item.ThumbnailPath}");
+                        }
 
                         // 从列表中移除
                         _imageItems.Remove(item);
+                        LogService.Info($"已从列表移除：{item.FilePath}");
                         count++;
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // 忽略单个文件删除失败
+                        LogService.Error($"删除图片失败：{filePath}", ex);
                     }
                 }
 
                 if (count > 0)
+                {
+                    LogService.Info($"删除完成，共删除 {count} 张图片");
                     Save();
+                }
+                else
+                {
+                    LogService.Warning("没有删除任何图片");
+                }
 
                 return count;
             }
+        }
+
+        /// <summary>
+        /// 批量删除（重试版本，处理文件被占用情况）
+        /// </summary>
+        public int DeleteImagesByPathWithRetry(List<string> filePaths, int maxRetries = 3)
+        {
+            lock (_lock)
+            {
+                var count = 0;
+
+                foreach (var filePath in filePaths)
+                {
+                    try
+                    {
+                        // 找到对应的 item
+                        var item = _imageItems.FirstOrDefault(i => i.FilePath == filePath);
+                        if (item == null)
+                        {
+                            LogService.Warning($"未找到图片：{filePath}");
+                            continue;
+                        }
+
+                        // 删除文件（带重试）
+                        if (File.Exists(item.FilePath))
+                        {
+                            bool deleted = false;
+                            for (int i = 0; i < maxRetries; i++)
+                            {
+                                try
+                                {
+                                    File.Delete(item.FilePath);
+                                    deleted = true;
+                                    LogService.Info($"已删除文件：{item.FilePath}");
+                                    break;
+                                }
+                                catch (IOException) when (i < maxRetries - 1)
+                                {
+                                    LogService.Warning($"文件被占用，等待 {100 * (i + 1)}ms 后重试：{item.FilePath}");
+                                    System.Threading.Thread.Sleep(100 * (i + 1));
+                                }
+                            }
+                            if (!deleted)
+                            {
+                                LogService.Error($"删除文件失败（多次重试后）：{item.FilePath}");
+                            }
+                        }
+                        else
+                        {
+                            LogService.Warning($"文件不存在：{item.FilePath}");
+                        }
+
+                        // 删除缩略图（带重试）
+                        if (File.Exists(item.ThumbnailPath))
+                        {
+                            bool deleted = false;
+                            for (int i = 0; i < maxRetries; i++)
+                            {
+                                try
+                                {
+                                    File.Delete(item.ThumbnailPath);
+                                    deleted = true;
+                                    LogService.Info($"已删除缩略图：{item.ThumbnailPath}");
+                                    break;
+                                }
+                                catch (IOException) when (i < maxRetries - 1)
+                                {
+                                    LogService.Warning($"缩略图被占用，等待 {100 * (i + 1)}ms 后重试：{item.ThumbnailPath}");
+                                    System.Threading.Thread.Sleep(100 * (i + 1));
+                                }
+                            }
+                            if (!deleted)
+                            {
+                                LogService.Warning($"删除缩略图失败（多次重试后）：{item.ThumbnailPath}");
+                            }
+                        }
+
+                        // 从列表中移除
+                        _imageItems.Remove(item);
+                        LogService.Info($"已从列表移除：{item.FilePath}");
+                        count++;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogService.Error($"删除图片失败：{filePath}", ex);
+                    }
+                }
+
+                if (count > 0)
+                {
+                    LogService.Info($"删除完成，共删除 {count} 张图片");
+                    Save();
+                }
+                else
+                {
+                    LogService.Warning("没有删除任何图片");
+                }
+
+                return count;
+            }
+        }
+
+        /// <summary>
+        /// 批量删除（旧方法，保留兼容）
+        /// </summary>
+        public int DeleteImages(IEnumerable<ImageItem> items)
+        {
+            return DeleteImagesByPath(items.Select(i => i.FilePath).ToList());
         }
 
         /// <summary>

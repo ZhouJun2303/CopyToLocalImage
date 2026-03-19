@@ -71,5 +71,14 @@ namespace CopyToLocalImage.Models
         /// 文件是否存在
         /// </summary>
         public bool FileExists => System.IO.File.Exists(FilePath);
+
+        /// <summary>
+        /// 刷新文件存在状态
+        /// </summary>
+        public void RefreshFileExists()
+        {
+            // 触发 PropertyChanged 通知（如果需要）
+            _ = FileExists;
+        }
     }
 }

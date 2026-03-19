@@ -154,11 +154,11 @@ namespace CopyToLocalImage
             var listBox = _isGridView ? GridViewListBox : ListViewListBox;
             if (listBox?.SelectedItems.Count == 0)
             {
-                MessageBox.Show("请先选择要删除的图片", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("请先选择要删除的图片", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            var result = MessageBox.Show(
+            var result = System.Windows.MessageBox.Show(
                 $"确定要删除选中的 {listBox.SelectedItems.Count} 张图片吗？\n\n此操作不可恢复！",
                 "确认删除",
                 MessageBoxButton.YesNo,
@@ -167,11 +167,19 @@ namespace CopyToLocalImage
             if (result != MessageBoxResult.Yes)
                 return;
 
-            var selectedItems = listBox.SelectedItems.Cast<ImageItem>().ToList();
-            var deletedCount = await System.Threading.Tasks.Task.Run(() =>
-                _storageService.DeleteImages(selectedItems));
+            // 先获取选中项的 FilePath 列表（避免 UI 线程对象引用问题）
+            var filePaths = listBox.SelectedItems.Cast<ImageItem>().Select(i => i.FilePath).ToList();
 
-            MessageBox.Show($"已删除 {deletedCount} 张图片", "删除完成", MessageBoxButton.OK, MessageBoxImage.Information);
+            LogService.Info($"准备删除 {filePaths.Count} 张图片");
+            foreach (var path in filePaths)
+            {
+                LogService.Info($"  - {path}");
+            }
+
+            var deletedCount = await System.Threading.Tasks.Task.Run(() =>
+                _storageService.DeleteImagesByPathWithRetry(filePaths));
+
+            System.Windows.MessageBox.Show($"已删除 {deletedCount} 张图片", "删除完成", MessageBoxButton.OK, MessageBoxImage.Information);
 
             // 刷新列表
             RefreshImages();
