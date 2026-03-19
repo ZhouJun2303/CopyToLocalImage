@@ -6,6 +6,7 @@
     <converters:DateToColorConverter x:Key="DateToColorConverter" />
     <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    <converters:FileNameConverter x:Key="FileNameConverter" />
 
     <!-- 浅色主题颜色 -->
     <SolidColorBrush x:Key="PrimaryBackground" Color="#F5F5F5" />

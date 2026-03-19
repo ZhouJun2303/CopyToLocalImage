@@ -1,4 +1,6 @@
 using System;
+using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -80,6 +82,26 @@ namespace CopyToLocalImage.Converters
             if (value is Visibility v)
                 return v == Visibility.Visible;
             return false;
+        }
+    }
+
+    /// <summary>
+    /// 文件路径转文件名转换器
+    /// </summary>
+    public class FileNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value is string path && !string.IsNullOrEmpty(path))
+            {
+                return Path.GetFileNameWithoutExtension(path);
+            }
+            return string.Empty;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

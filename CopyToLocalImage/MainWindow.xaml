@@ -109,6 +109,7 @@
                      AllowDrop="True"
                      DragOver="ListBox_DragOver"
                      Drop="ListBox_Drop"
+                     PreviewMouseMove="ListBox_PreviewMouseMove"
                      SelectionMode="Extended"
                      ItemContainerStyle="{StaticResource ImageListBoxItem}">
                 <ListBox.ItemsPanel>
@@ -135,6 +136,7 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="140" />
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
 
@@ -142,22 +144,56 @@
                                 <Border Grid.Row="0"
                                         Background="{StaticResource TertiaryBackground}"
                                         CornerRadius="4"
-                                        Margin="0,0,0,8">
-                                    <Image x:Name="ThumbnailImage"
-                                           Stretch="Uniform"
-                                           Margin="4" />
+                                        Margin="0,0,0,4">
+                                    <Grid>
+                                        <!-- 缩略图 -->
+                                        <Image x:Name="ThumbnailImage"
+                                               Stretch="UniformToFill"
+                                               Margin="4" />
+                                        <!-- 文件名标签（悬浮显示） -->
+                                        <Border Background="#80000000"
+                                                VerticalAlignment="Bottom"
+                                                Visibility="Collapsed">
+                                            <TextBlock Text="{Binding FilePath}"
+                                                       Foreground="White"
+                                                       FontSize="10"
+                                                       Padding="4,2"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       MaxHeight="30"
+                                                       TextWrapping="Wrap"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                                <!-- 文件名 -->
+                                <Border Grid.Row="1"
+                                        Background="{StaticResource SelectionBackground}"
+                                        CornerRadius="4"
+                                        Margin="0,4"
+                                        Padding="4,2">
+                                    <TextBlock Text="{Binding FilePath, Converter={StaticResource FileNameConverter}}"
+                                               FontSize="11"
+                                               FontWeight="Bold"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip="{Binding FilePath}" />
                                 </Border>
 
                                 <!-- 信息 -->
-                                <StackPanel Grid.Row="1">
-                                    <TextBlock x:Name="DateText"
-                                               Text="{Binding DateString}"
-                                               FontSize="12"
-                                               FontWeight="Bold"
-                                               Margin="0,0,0,4" />
-                                    <TextBlock Text="{Binding FileSizeDisplay}"
-                                               FontSize="11"
-                                               Foreground="{StaticResource SecondaryText}" />
+                                <StackPanel Grid.Row="2">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="DateText"
+                                                   Text="{Binding DateString}"
+                                                   FontSize="12"
+                                                   FontWeight="Bold" />
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding FileSizeDisplay}"
+                                                   FontSize="11"
+                                                   Foreground="{StaticResource SecondaryText}" />
+                                    </Grid>
                                     <TextBlock FontSize="11"
                                                Foreground="{StaticResource SecondaryText}">
                                         <TextBlock.Text>
@@ -184,6 +220,7 @@
                      AllowDrop="True"
                      DragOver="ListBox_DragOver"
                      Drop="ListBox_Drop"
+                     PreviewMouseMove="ListBox_PreviewMouseMove"
                      SelectionMode="Extended"
                      ItemContainerStyle="{StaticResource ImageListBoxItem}"
                      Visibility="Collapsed">

@@ -281,6 +281,22 @@ namespace CopyToLocalImage
             }
         }
 
+        /// <summary>
+        /// 处理拖拽开始（支持将图片项拖拽出去）
+        /// </summary>
+        private void ListBox_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                var listBox = sender as ListBox;
+                if (listBox?.SelectedItem is ImageItem item)
+                {
+                    var data = new DataObject(DataFormats.FileDrop, new[] { item.FilePath });
+                    DragDrop.DoDragDrop(listBox, data, DragDropEffects.Copy);
+                }
+            }
+        }
+
         #endregion
 
         #region 窗口控制
