@@ -13,6 +13,7 @@ namespace CopyToLocalImage.Services
         private nint _windowHandle;
         private bool _disposed;
         private readonly Action _onClipboardChanged;
+        private DateTime _lastTriggered = DateTime.MinValue;
 
         // Windows API 常量
         private const int WM_CLIPBOARDUPDATE = 0x031D;
@@ -87,6 +88,15 @@ namespace CopyToLocalImage.Services
         {
             if (msg == WM_CLIPBOARDUPDATE)
             {
+                // 防止重复触发（100ms 内只触发一次）
+                var now = DateTime.Now;
+                if ((now - _lastTriggered).TotalMilliseconds < 100)
+                {
+                    handled = true;
+                    return nint.Zero;
+                }
+                _lastTriggered = now;
+
                 try
                 {
                     if (IsImageInClipboard())
@@ -110,7 +120,25 @@ namespace CopyToLocalImage.Services
         {
             try
             {
-                return Clipboard.ContainsImage();
+                // 方法 1: WPF 检查
+                if (Clipboard.ContainsImage())
+                {
+                    return true;
+                }
+
+                // 方法 2: 检查 WinForms 格式（兼容微信等）
+                if (System.Windows.Forms.Clipboard.ContainsImage())
+                {
+                    return true;
+                }
+
+                // 方法 3: 检查 DIB 格式
+                if (System.Windows.Forms.Clipboard.ContainsData(System.Windows.Forms.DataFormats.Dib))
+                {
+                    return true;
+                }
+
+                return false;
             }
             catch
             {

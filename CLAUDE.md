@@ -11,6 +11,10 @@ dotnet build --configuration Release
 dotnet run
 ```
 
+## Packaging
+
+Run `build.bat` from the repository root to create a distributable package. Output will be in `build_output/` directory.
+
 ## Architecture Overview
 
 This is a WPF-based Windows desktop application that monitors the system clipboard for images and automatically saves them.
@@ -48,3 +52,7 @@ This is a WPF-based Windows desktop application that monitors the system clipboa
 - Images saved to: `{SavePath}/{yyyy-MM-dd}/clipboard_{timestamp}_{guid}.png`
 - Thumbnails saved to: `{SavePath}/_thumbnails/{yyyy-MM-dd}/{filename}.thumb.png`
 - Default save path: `%USERPROFILE%/Pictures/ClipboardImages`
+
+### Single Instance
+
+The application uses a `Mutex` named `CopyToLocalImage_SingleInstance` to ensure only one instance runs at a time.

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Windows;
 using CopyToLocalImage.Models;
 using CopyToLocalImage.Services;
@@ -10,6 +11,7 @@ namespace CopyToLocalImage
     /// </summary>
     public partial class App : Application
     {
+        private static Mutex? _mutex;
         private AppSettings _settings = null!;
         private StorageService _storageService = null!;
         private ImageService _imageService = null!;
@@ -20,6 +22,15 @@ namespace CopyToLocalImage
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // 确保只有一个实例运行
+            _mutex = new Mutex(true, "CopyToLocalImage_SingleInstance", out bool createdNew);
+            if (!createdNew)
+            {
+                LogService.Info("检测到已有实例运行，退出当前实例");
+                Shutdown();
+                return;
+            }
+
             LogService.Info("========== 应用启动 ==========");
             LogService.Info($"命令行参数：{string.Join(" ", e.Args)}");
             LogService.Info($".NET 版本：{Environment.Version}");
@@ -195,13 +206,32 @@ namespace CopyToLocalImage
         /// </summary>
         private void ShowMainWindow()
         {
-            if (_mainWindow.WindowState == WindowState.Minimized)
+            try
             {
-                _mainWindow.WindowState = WindowState.Normal;
+                if (_mainWindow == null || !_mainWindow.IsVisible)
+                {
+                    // 窗口已关闭，重新创建
+                    _mainWindow = new MainWindow(_storageService, _imageService);
+                    _mainWindow.Closing += MainWindow_Closing;
+                    if (_settings.UseDarkTheme)
+                    {
+                        _mainWindow.ApplyDarkTheme();
+                    }
+                    _mainWindow.Show();
+                }
+
+                if (_mainWindow.WindowState == WindowState.Minimized)
+                {
+                    _mainWindow.WindowState = WindowState.Normal;
+                }
+                _mainWindow.Activate();
+                _mainWindow.Focus();
+                _mainWindow.RefreshImages();
             }
-            _mainWindow.Activate();
-            _mainWindow.Focus();
-            _mainWindow.RefreshImages();
+            catch (Exception ex)
+            {
+                LogService.Error("显示主窗口失败", ex);
+            }
         }
 
         /// <summary>
