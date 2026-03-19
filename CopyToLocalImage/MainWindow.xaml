@@ -144,25 +144,15 @@
                                 <Border Grid.Row="0"
                                         Background="{StaticResource TertiaryBackground}"
                                         CornerRadius="4"
-                                        Margin="0,0,0,4">
-                                    <Grid>
-                                        <!-- 缩略图 -->
-                                        <Image x:Name="ThumbnailImage"
-                                               Stretch="UniformToFill"
-                                               Margin="4" />
-                                        <!-- 文件名标签（悬浮显示） -->
-                                        <Border Background="#80000000"
-                                                VerticalAlignment="Bottom"
-                                                Visibility="Collapsed">
-                                            <TextBlock Text="{Binding FilePath}"
-                                                       Foreground="White"
-                                                       FontSize="10"
-                                                       Padding="4,2"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       MaxHeight="30"
-                                                       TextWrapping="Wrap"/>
-                                        </Border>
-                                    </Grid>
+                                        Margin="0,0,0,4"
+                                        ClipToBounds="True">
+                                    <Image Source="{Binding FilePath}"
+                                           Stretch="UniformToFill"
+                                           Margin="4">
+                                        <Image.ToolTip>
+                                            <TextBlock Text="{Binding FilePath}" />
+                                        </Image.ToolTip>
+                                    </Image>
                                 </Border>
 
                                 <!-- 文件名 -->
