@@ -111,7 +111,17 @@
                      Drop="ListBox_Drop"
                      PreviewMouseMove="ListBox_PreviewMouseMove"
                      SelectionMode="Extended"
-                     ItemContainerStyle="{StaticResource ImageListBoxItem}">
+                     ItemContainerStyle="{StaticResource ImageListBoxItem}"
+                     VirtualizingPanel.IsVirtualizing="True"
+                     VirtualizingPanel.VirtualizationMode="Recycling">
+                <ListBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="打开文件位置" Click="OpenFileLocationMenuItem_Click" />
+                        <MenuItem Header="在资源管理器中显示" Click="ShowInExplorerMenuItem_Click" />
+                        <Separator />
+                        <MenuItem Header="删除" Click="DeleteMenuItem_Click" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" />
@@ -119,14 +129,15 @@
                 </ListBox.ItemsPanel>
                 <ListBox.Template>
                     <ControlTemplate TargetType="ListBox">
-                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+                                      CanContentScroll="True">
                             <ItemsPresenter />
                         </ScrollViewer>
                     </ControlTemplate>
                 </ListBox.Template>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Width="180" Height="240"
+                        <Border x:Name="ImageBorder" Width="180" Height="240"
                                 Background="{StaticResource SecondaryBackground}"
                                 CornerRadius="8" Margin="4" Padding="8"
                                 BorderThickness="2"
@@ -140,6 +151,16 @@
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
+                            <Border.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0" To="1" Duration="0:0:0.3" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Border.Triggers>
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="140" />
@@ -220,11 +241,31 @@
                      PreviewMouseMove="ListBox_PreviewMouseMove"
                      SelectionMode="Extended"
                      ItemContainerStyle="{StaticResource ImageListBoxItem}"
-                     Visibility="Collapsed">
+                     Visibility="Collapsed"
+                     VirtualizingPanel.IsVirtualizing="True"
+                     VirtualizingPanel.VirtualizationMode="Recycling">
+                <ListBox.Template>
+                    <ControlTemplate TargetType="ListBox">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+                                      CanContentScroll="True">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ListBox.Template>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Background="{StaticResource SecondaryBackground}"
+                        <Border x:Name="ListBorder" Background="{StaticResource SecondaryBackground}"
                                 CornerRadius="4" Margin="2,4" Padding="8">
+                            <Border.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0" To="1" Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Border.Triggers>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="60" />

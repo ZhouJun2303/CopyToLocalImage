@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -343,13 +344,145 @@ namespace CopyToLocalImage
 
         #endregion
 
+        #region 主题切换
+
+        /// <summary>
+        /// 应用深色主题
+        /// </summary>
+        public void ApplyDarkTheme()
+        {
+            Resources["PrimaryBackground"] = FindResource("DarkPrimaryBackground");
+            Resources["SecondaryBackground"] = FindResource("DarkSecondaryBackground");
+            Resources["TertiaryBackground"] = FindResource("DarkTertiaryBackground");
+            Resources["PrimaryText"] = FindResource("DarkPrimaryText");
+            Resources["SecondaryText"] = FindResource("DarkSecondaryText");
+            Resources["AccentColor"] = FindResource("DarkAccentColor");
+            Resources["AccentHover"] = FindResource("DarkAccentHover");
+            Resources["BorderBrush"] = FindResource("DarkBorderBrush");
+            Resources["SelectionBackground"] = FindResource("DarkSelectionBackground");
+            Resources["DeleteColor"] = FindResource("DarkDeleteColor");
+            Resources["DeleteHover"] = FindResource("DarkDeleteHover");
+        }
+
+        /// <summary>
+        /// 应用浅色主题
+        /// </summary>
+        public void ApplyLightTheme()
+        {
+            Resources["PrimaryBackground"] = FindResource("PrimaryBackground");
+            Resources["SecondaryBackground"] = FindResource("SecondaryBackground");
+            Resources["TertiaryBackground"] = FindResource("TertiaryBackground");
+            Resources["PrimaryText"] = FindResource("PrimaryText");
+            Resources["SecondaryText"] = FindResource("SecondaryText");
+            Resources["AccentColor"] = FindResource("AccentColor");
+            Resources["AccentHover"] = FindResource("AccentHover");
+            Resources["BorderBrush"] = FindResource("BorderBrush");
+            Resources["SelectionBackground"] = FindResource("SelectionBackground");
+            Resources["DeleteColor"] = FindResource("DeleteColor");
+            Resources["DeleteHover"] = FindResource("DeleteHover");
+        }
+
+        #endregion
+
         #region 设置按钮
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             var settingsWindow = new SettingsWindow();
             settingsWindow.Owner = this;
+            settingsWindow.SettingsSaved += () =>
+            {
+                // 重新加载设置并应用主题
+                var settings = AppSettings.Load();
+                if (settings.UseDarkTheme)
+                {
+                    ApplyDarkTheme();
+                }
+                else
+                {
+                    ApplyLightTheme();
+                }
+            };
             settingsWindow.ShowDialog();
+        }
+
+        #endregion
+
+        #region 右键菜单功能
+
+        /// <summary>
+        /// 打开文件位置
+        /// </summary>
+        private void OpenFileLocationMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (GridViewListBox?.SelectedItem is ImageItem item)
+            {
+                try
+                {
+                    var dir = System.IO.Path.GetDirectoryName(item.FilePath);
+                    if (!string.IsNullOrEmpty(dir) && System.IO.Directory.Exists(dir))
+                    {
+                        System.Diagnostics.Process.Start("explorer.exe", dir);
+                    }
+                }
+                catch
+                {
+                    System.Windows.MessageBox.Show("无法打开文件夹", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 在资源管理器中显示文件
+        /// </summary>
+        private void ShowInExplorerMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (GridViewListBox?.SelectedItem is ImageItem item)
+            {
+                try
+                {
+                    if (System.IO.File.Exists(item.FilePath))
+                    {
+                        System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{item.FilePath}\"");
+                    }
+                }
+                catch
+                {
+                    System.Windows.MessageBox.Show("无法定位文件", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 删除选中项
+        /// </summary>
+        private void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            ImageItem? targetItem = null;
+            if (GridViewListBox?.SelectedItem is ImageItem gridItem)
+            {
+                targetItem = gridItem;
+            }
+            else if (ListViewListBox?.SelectedItem is ImageItem listItem)
+            {
+                targetItem = listItem;
+            }
+
+            if (targetItem != null)
+            {
+                var result = System.Windows.MessageBox.Show(
+                    $"确定要删除这张图片吗？\n\n此操作不可恢复！",
+                    "确认删除",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    _ = System.Threading.Tasks.Task.Run(() =>
+                        _storageService.DeleteImagesByPathWithRetry(new List<string> { targetItem.FilePath }));
+                    RefreshImages();
+                }
+            }
         }
 
         #endregion

@@ -22,6 +22,19 @@
     <SolidColorBrush x:Key="DeleteColor" Color="#D13438" />
     <SolidColorBrush x:Key="DeleteHover" Color="#C50F1F" />
 
+    <!-- 深色主题颜色 -->
+    <SolidColorBrush x:Key="DarkPrimaryBackground" Color="#1E1E1E" />
+    <SolidColorBrush x:Key="DarkSecondaryBackground" Color="#2D2D2D" />
+    <SolidColorBrush x:Key="DarkTertiaryBackground" Color="#3D3D3D" />
+    <SolidColorBrush x:Key="DarkPrimaryText" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="DarkSecondaryText" Color="#B0B0B0" />
+    <SolidColorBrush x:Key="DarkAccentColor" Color="#4FC1FF" />
+    <SolidColorBrush x:Key="DarkAccentHover" Color="#6BCBFF" />
+    <SolidColorBrush x:Key="DarkBorderBrush" Color="#505050" />
+    <SolidColorBrush x:Key="DarkSelectionBackground" Color="#3E5A75" />
+    <SolidColorBrush x:Key="DarkDeleteColor" Color="#FF6B68" />
+    <SolidColorBrush x:Key="DarkDeleteHover" Color="#FF8B88" />
+
     <!-- 主窗口样式 -->
     <Style x:Key="WindowStyle" TargetType="Window">
         <Setter Property="Background" Value="{StaticResource PrimaryBackground}" />
@@ -168,9 +181,16 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Border" Property="Background" Value="{StaticResource TertiaryBackground}" />
+                            <Setter TargetName="Border" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="8" ShadowDepth="0" Opacity="0.3" />
+                                </Setter.Value>
+                            </Setter>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="Border" Property="Background" Value="{StaticResource SelectionBackground}" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentColor}" />
+                            <Setter TargetName="Border" Property="BorderThickness" Value="2" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -216,5 +236,28 @@
         <DoubleAnimation Storyboard.TargetProperty="Opacity"
                          From="1" To="0" Duration="0:0:0.2" />
     </Storyboard>
+
+    <!-- 深色主题样式 -->
+    <Style x:Key="DarkWindowStyle" TargetType="Window">
+        <Setter Property="Background" Value="{StaticResource DarkPrimaryBackground}" />
+        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{StaticResource DarkPrimaryText}" />
+    </Style>
+
+    <!-- 图片加载动画 -->
+    <Style x:Key="AnimatedImageBorder" TargetType="Border">
+        <Setter Property="Opacity" Value="0" />
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1" Duration="0:0:0.3" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
 
 </ResourceDictionary>

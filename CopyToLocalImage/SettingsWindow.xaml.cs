@@ -11,6 +11,7 @@ namespace CopyToLocalImage
     public partial class SettingsWindow : Window
     {
         private AppSettings _settings;
+        public event Action? SettingsSaved;
 
         public SettingsWindow()
         {
@@ -63,6 +64,7 @@ namespace CopyToLocalImage
             _settings.Save();
 
             System.Windows.MessageBox.Show("设置已保存", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            SettingsSaved?.Invoke();
             DialogResult = true;
             Close();
         }

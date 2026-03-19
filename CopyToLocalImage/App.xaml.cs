@@ -55,6 +55,13 @@ namespace CopyToLocalImage
                 _mainWindow = new MainWindow(_storageService, _imageService);
                 LogService.Info("主窗口创建完成");
 
+                // 应用深色主题
+                if (_settings.UseDarkTheme)
+                {
+                    LogService.Info("应用深色主题");
+                    _mainWindow.ApplyDarkTheme();
+                }
+
                 // 注册主窗口关闭事件
                 _mainWindow.Closing += MainWindow_Closing;
 
