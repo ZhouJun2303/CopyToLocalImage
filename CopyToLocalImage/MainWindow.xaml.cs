@@ -454,6 +454,47 @@ namespace CopyToLocalImage
         }
 
         /// <summary>
+        /// 复制选中项的路径到剪切板
+        /// </summary>
+        private void CopyPathButton_Click(object sender, RoutedEventArgs e)
+        {
+            CopySelectedPathsToClipboard();
+        }
+
+        /// <summary>
+        /// 复制选中项的路径到剪切板（右键菜单）
+        /// </summary>
+        private void CopyPathMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            CopySelectedPathsToClipboard();
+        }
+
+        /// <summary>
+        /// 统一处理复制路径逻辑
+        /// </summary>
+        private void CopySelectedPathsToClipboard()
+        {
+            var listBox = _isGridView ? GridViewListBox : ListViewListBox;
+            if (listBox?.SelectedItems.Count == 0)
+            {
+                System.Windows.MessageBox.Show("请先选择要复制路径的图片", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var filePaths = listBox.SelectedItems.Cast<ImageItem>().Select(i => i.FilePath).ToList();
+            var text = string.Join(Environment.NewLine, filePaths);
+
+            try
+            {
+                Clipboard.SetText(text);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"复制失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
         /// 删除选中项
         /// </summary>
         private void DeleteMenuItem_Click(object sender, RoutedEventArgs e)

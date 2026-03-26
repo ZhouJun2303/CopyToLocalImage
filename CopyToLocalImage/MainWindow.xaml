@@ -84,11 +84,11 @@
                 </ComboBox>
 
                 <StackPanel Grid.Column="3" Orientation="Horizontal">
-                    <Button x:Name="SelectAllButton"
+                    <Button x:Name="CopyPathButton"
                             Style="{StaticResource SecondaryButton}"
-                            Content="全选"
+                            Content="📋 复制路径"
                             Margin="0,0,8,0"
-                            Click="SelectAllButton_Click" />
+                            Click="CopyPathButton_Click" />
                     <Button x:Name="DeleteSelectedButton"
                             Style="{StaticResource DangerButton}"
                             Content="🗑 删除选中"
@@ -118,6 +118,7 @@
                     <ContextMenu>
                         <MenuItem Header="打开文件位置" Click="OpenFileLocationMenuItem_Click" />
                         <MenuItem Header="在资源管理器中显示" Click="ShowInExplorerMenuItem_Click" />
+                        <MenuItem Header="复制路径" Click="CopyPathMenuItem_Click" />
                         <Separator />
                         <MenuItem Header="删除" Click="DeleteMenuItem_Click" />
                     </ContextMenu>
